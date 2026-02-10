@@ -3,16 +3,17 @@ package cmp_proxy
 import (
 	"context"
 	"fmt"
-	"github.com/helays/ssh-proxy-plus/configs"
-	"github.com/helays/ssh-proxy-plus/internal/model"
-	"github.com/helays/ssh-proxy-plus/internal/types"
 	"net"
 	"sync"
 	"time"
 
-	"github.com/helays/utils/v2/close/vclose"
-	"github.com/helays/utils/v2/tools/ringbuffer"
+	"github.com/helays/ssh-proxy-plus/configs"
+	"github.com/helays/ssh-proxy-plus/internal/model"
+	"github.com/helays/ssh-proxy-plus/internal/types"
+
 	"golang.org/x/crypto/ssh"
+	"helay.net/go/utils/v3/close/vclose"
+	"helay.net/go/utils/v3/tools/ringbuffer"
 )
 
 func GetLogRingBuffer(id string) *ringbuffer.RingBuffer[Logs] {
@@ -93,6 +94,7 @@ func Start(c model.Connect) {
 				}
 				pc.logs("启动代理")
 				pc.scheduler()
+				pc.logs("代理结束")
 			}
 
 		}
@@ -118,10 +120,11 @@ type proxyConnect struct {
 	parentReConnectCancel context.CancelFunc
 
 	buffer *ringbuffer.RingBuffer[Logs] // 环形缓冲区
+
 }
 
 func newProxy(c model.Connect) *proxyConnect {
-	pc := proxyConnect{connect: c}
+	pc := &proxyConnect{connect: c}
 	pc.reConnectCtx, pc.reConnectCancel = context.WithCancel(context.Background())
 
 	if parent, ok := connectMap.Load(c.Pid); ok {
@@ -139,8 +142,8 @@ func newProxy(c model.Connect) *proxyConnect {
 		_pc = nil
 		connectMap.Delete(c.Id)
 	}
-	connectMap.Store(c.Id, &pc)
-	return &pc
+	connectMap.Store(c.Id, pc)
+	return pc
 }
 
 func (p *proxyConnect) scheduler() {
@@ -160,7 +163,7 @@ func (p *proxyConnect) scheduler() {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 		tck := time.NewTicker(cfg.Common.HeartBeat)
-		go p.quit(ctx, func() { tck.Stop(); cancel() })
+		go p.quit("心跳线程", ctx, func() { tck.Stop(); cancel() })
 		for {
 			select {
 			case <-tck.C:
@@ -184,7 +187,6 @@ func (p *proxyConnect) scheduler() {
 		p.localAndDynamic(p.forwardDynamic)
 	case types.ForwardTypeHTTP:
 		p.forwardHTTP()
-
 	}
 }
 
@@ -238,13 +240,14 @@ func (p *proxyConnect) heartBeat() error {
 }
 
 // 统一的退出以及回调函数
-func (p *proxyConnect) quit(ctx context.Context, fs ...func()) {
+func (p *proxyConnect) quit(schedulerName string, ctx context.Context, fs ...func()) {
 	defer func() {
 		if len(fs) > 0 {
-			p.logs("隧道内部监听上下文停止信号，回调清理函数触发")
+			p.logs("[%s]隧道内部监听上下文停止信号，回调清理函数触发", schedulerName)
 			for i := range fs {
 				fs[i]()
 			}
+			p.logs("[%s]隧道内部清理完成", schedulerName)
 		}
 	}()
 	select {
@@ -271,7 +274,7 @@ func (p *proxyConnect) localAndDynamic(f proxyFunc) {
 	p.logs("本地转发或者动态转发启动")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	go p.quit(ctx, cancel)
+	go p.quit("本地|动态代理", ctx, cancel)
 	lc := net.ListenConfig{KeepAlive: time.Minute}
 	localServer, err := lc.Listen(ctx, "tcp", p.connect.Listen)
 	defer vclose.Close(localServer)

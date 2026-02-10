@@ -2,10 +2,11 @@ package cmp_proxy
 
 import (
 	"context"
-	"github.com/helays/ssh-proxy-plus/internal/types"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/helays/ssh-proxy-plus/internal/types"
 
 	"helay.net/go/utils/v3/close/vclose"
 )
@@ -52,14 +53,14 @@ func (p *proxyConnect) forwardRemote() {
 	p.logs("远程代理启动成功 %s", p.connect.Remote)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	go p.quit(ctx, func() {
+	go p.quit("反向代理", ctx, func() {
 		cancel()
 		vclose.Close(server)
 	})
 	for {
 		client, accErr := server.Accept()
 		if accErr != nil {
-			p.error("远程转发 %s TCP 远程数据接收失败 %v", p.connect.Remote, err)
+			p.error("远程转发 %s TCP 远程数据接收失败 %v", p.connect.Remote, accErr)
 			return
 		}
 		p.logs("远程转发收到请求 远程[%s] 本地[%s]", client.RemoteAddr().String(), client.LocalAddr().String())

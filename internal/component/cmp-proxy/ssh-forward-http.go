@@ -33,7 +33,7 @@ func (p *proxyConnect) forwardHTTP() {
 			}
 		}),
 	}
-	go p.quit(ctx, cancel)
+	go p.quit("HTTP代理", ctx, cancel)
 	go func() {
 		<-ctx.Done()
 		httpClose.Server(&server)

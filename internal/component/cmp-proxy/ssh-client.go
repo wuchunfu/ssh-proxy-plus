@@ -252,16 +252,16 @@ func (p *proxyConnect) quit(schedulerName string, ctx context.Context, fs ...fun
 	}()
 	select {
 	case <-p.parentReConnectCtx.Done():
-		p.logs("隧道内部父级停止信号")
+		p.logs("[%s]隧道内部父级停止信号", schedulerName)
 		return
 	case <-p.stopCtx.Done():
-		p.logs("隧道内部停止")
+		p.logs("[%s]隧道内部停止", schedulerName)
 		return
 	case <-p.reConnectCtx.Done():
-		p.logs("隧道内部收到重连信号")
+		p.logs("[%s]隧道内部收到重连信号", schedulerName)
 		return
 	case <-ctx.Done():
-		p.logs("隧道内部区块停止")
+		p.logs("[%s]隧道内部区块停止", schedulerName)
 		p.reConnectCancel() // 发送重连信号
 		return
 	}

@@ -54,7 +54,9 @@ func (p *proxyConnect) forwardRemote() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	go p.quit("反向代理", ctx, func() {
+		p.logs("反向代理，关闭ctx")
 		cancel()
+		p.logs("反向代理，关闭server")
 		vclose.Close(server)
 	})
 	for {

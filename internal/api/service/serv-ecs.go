@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/helays/ssh-proxy-plus/configs"
 	"github.com/helays/ssh-proxy-plus/internal/cache"
 	"github.com/helays/ssh-proxy-plus/internal/dal"
 	dal_connect "github.com/helays/ssh-proxy-plus/internal/dal/dal-connect"
 	"github.com/helays/ssh-proxy-plus/internal/model"
-	"strconv"
-	"time"
 
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	ecs20140526 "github.com/alibabacloud-go/ecs-20140526/v4/client"
@@ -123,8 +124,7 @@ func (s *EcsService) deleteInstance(order *model.AliEcsOrder) (string, error) {
 	result, err := client.DeleteInstanceWithOptions(deleteInstanceRequest, runtime)
 	if err != nil {
 		var _err = &tea.SDKError{}
-		var _t *tea.SDKError
-		if errors.As(err, &_t) {
+		if _t, ok := errors.AsType[*tea.SDKError](err); ok {
 			_err = _t
 		}
 		return "", fmt.Errorf("删除实例失败，状态码：%d，错误信息：%s，原始信息： %s",
@@ -174,8 +174,7 @@ func (s *EcsService) CreateInstance(postData *model.AliEcsOrder) (any, error) {
 		futureTimeUTC := nowUTC.Add(time.Hour * time.Duration(postData.AutoReleaseTime))
 
 		// 使用ISO 8601格式化时间，Z表示零时区（即UTC+0）
-		formattedTime := futureTimeUTC.Format("2006-01-02T15:04:05Z")
-		requestInfo.AutoReleaseTime = &formattedTime
+		requestInfo.AutoReleaseTime = new(futureTimeUTC.Format("2006-01-02T15:04:05Z"))
 	}
 	db := dal.GetDB()
 	if err = db.Create(&postData).Error; err != nil {
@@ -186,8 +185,7 @@ func (s *EcsService) CreateInstance(postData *model.AliEcsOrder) (any, error) {
 	result, err := client.RunInstancesWithOptions(requestInfo, runtime)
 	if err != nil {
 		var _err = &tea.SDKError{}
-		var _t *tea.SDKError
-		if errors.As(err, &_t) {
+		if _t, ok := errors.AsType[*tea.SDKError](err); ok {
 			_err = _t
 		}
 		var errData map[string]any
@@ -253,8 +251,7 @@ func (s *EcsService) describeInstanceAttribute(client *ecs20140526.Client, order
 	result, err := client.DescribeInstanceAttributeWithOptions(describeInstanceAttributeRequest, runtime)
 	if err != nil {
 		var _err = &tea.SDKError{}
-		var _t *tea.SDKError
-		if errors.As(err, &_t) {
+		if _t, ok := errors.AsType[*tea.SDKError](err); ok {
 			_err = _t
 		}
 		var errData map[string]any

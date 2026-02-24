@@ -152,8 +152,7 @@ func FindConnectStatus() map[string]interface{} {
 
 // 辅助函数：检查是否为超时错误
 func isTimeoutError(err error) bool {
-	var opErr *net.OpError
-	if errors.As(err, &opErr) {
+	if opErr, ok := errors.AsType[*net.OpError](err); ok {
 		return opErr.Timeout()
 	}
 	return false
@@ -161,8 +160,7 @@ func isTimeoutError(err error) bool {
 
 // 辅助函数：检查是否为连接关闭错误
 func isClosedError(err error) bool {
-	var opErr *net.OpError
-	if errors.As(err, &opErr) {
+	if opErr, ok := errors.AsType[*net.OpError](err); ok {
 		return opErr.Err.Error() == "use of closed network connection"
 	}
 	return strings.Contains(err.Error(), "use of closed network connection")

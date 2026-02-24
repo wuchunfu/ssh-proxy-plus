@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql/driver"
+
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
@@ -67,8 +68,8 @@ type AliEcsOrder struct {
 	RunStatus       string            `json:"run_status" gorm:"type:varchar(64);not null;default:''"`         // 运行状态
 	PublicIpAddress string            `json:"public_ip_address" gorm:"type:varchar(128);not null;default:''"` // 实例IP
 
-	CreateTime dataType.CustomTime `json:"create_time" gorm:"index;not null;type:timestamp;default:current_timestamp"`     // 创建时间
-	UpdateTime dataType.CustomTime `json:"update_time" gorm:"index;not null;type:timestamp;default:'0000-00-00 00:00:00'"` // 更新时间
+	CreateTime *dataType.CustomTime `json:"create_time,omitempty" gorm:"autoCreateTime:true;index;not null;default:current_timestamp;comment:记录创建时间" form:"-"`
+	UpdateTime *dataType.CustomTime `json:"update_time,omitempty" gorm:"autoUpdateTime:true;comment:记录更新时间" form:"-"`
 }
 
 func (a *AliEcsOrder) TableName() string {

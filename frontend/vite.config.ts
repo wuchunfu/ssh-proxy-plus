@@ -47,6 +47,7 @@ export default defineConfig({
         }
     },
     build: {
+        target: 'es2022' ,// 或者 'esnext'，这两个都支持顶层await
         outDir: '../dist/html', // 将输出目录设置为'build'，根据需要自定义
         emptyOutDir: true, // 强制清空目录
         assetsDir: 'assets', // 资源文件输出目录

@@ -10,6 +10,7 @@ import (
 	"github.com/helays/ssh-proxy-plus/configs"
 	"github.com/helays/ssh-proxy-plus/internal/model"
 	"github.com/helays/ssh-proxy-plus/internal/types"
+	"golang.org/x/net/proxy"
 
 	"golang.org/x/crypto/ssh"
 	"helay.net/go/utils/v3/close/vclose"
@@ -252,22 +253,22 @@ func (p *proxyConnect) quit(schedulerName string, ctx context.Context, fs ...fun
 	}()
 	select {
 	case <-p.parentReConnectCtx.Done():
-		p.logs("隧道内部父级停止信号")
+		p.logs("[%s]隧道内部父级停止信号", schedulerName)
 		return
 	case <-p.stopCtx.Done():
-		p.logs("隧道内部停止")
+		p.logs("[%s]隧道内部停止", schedulerName)
 		return
 	case <-p.reConnectCtx.Done():
-		p.logs("隧道内部收到重连信号")
+		p.logs("[%s]隧道内部收到重连信号", schedulerName)
 		return
 	case <-ctx.Done():
-		p.logs("隧道内部区块停止")
+		p.logs("[%s]隧道内部区块停止", schedulerName)
 		p.reConnectCancel() // 发送重连信号
 		return
 	}
 }
 
-type proxyFunc func(conn net.Conn)
+type proxyFunc func(conn net.Conn, dialer proxy.Dialer)
 
 func (p *proxyConnect) localAndDynamic(f proxyFunc) {
 	defer p.logs("隧道正向代理或者动态代理停止")
@@ -323,7 +324,7 @@ func (p *proxyConnect) localAndDynamic(f proxyFunc) {
 			}
 
 		}
-		go f(client)
+		go f(client, p.client)
 	}
 }
 

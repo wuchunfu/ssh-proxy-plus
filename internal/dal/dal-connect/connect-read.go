@@ -2,6 +2,7 @@ package dal_connect
 
 import (
 	"fmt"
+
 	"github.com/helays/ssh-proxy-plus/internal/cache"
 	"github.com/helays/ssh-proxy-plus/internal/dal"
 	"github.com/helays/ssh-proxy-plus/internal/model"
@@ -19,7 +20,7 @@ func SaveData(data *model.Connect, isNew bool) error {
 		return nil
 	}
 	tx := db.Where("id like ?", data.Id)
-	data.UpdateTime = dataType.NewCustomTimeNow()
+	data.UpdateTime = new(dataType.NewCustomTimeNow())
 	err := tx.Omit("id", "active", "create_time").Updates(data).Error
 	if err != nil {
 		return fmt.Errorf("隧道连接信息更新失败 %v", err)

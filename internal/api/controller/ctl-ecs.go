@@ -2,10 +2,11 @@ package controller
 
 import (
 	"errors"
+	"net/http"
+
 	"github.com/helays/ssh-proxy-plus/internal/api/service"
 	"github.com/helays/ssh-proxy-plus/internal/dal"
 	"github.com/helays/ssh-proxy-plus/internal/model"
-	"net/http"
 
 	ecs20140526 "github.com/alibabacloud-go/ecs-20140526/v4/client"
 	util "github.com/alibabacloud-go/tea-utils/v2/service"
@@ -39,8 +40,7 @@ func (c *Controller) CtlDescribeRegions(w http.ResponseWriter, r *http.Request) 
 	result, err := client.DescribeRegionsWithOptions(describeRegionsRequest, runtime)
 	if err != nil {
 		var _err = &tea.SDKError{}
-		var _t *tea.SDKError
-		if errors.As(err, &_t) {
+		if _t, ok := errors.AsType[*tea.SDKError](err); ok {
 			_err = _t
 		}
 		response.SetReturnCode(w, r, *_err.StatusCode, *_err.Message, *_err.Data)
@@ -73,8 +73,7 @@ func (c *Controller) CtlDescribeAvailableResource(w http.ResponseWriter, r *http
 	result, err := client.DescribeAvailableResourceWithOptions(describeAvailableResourceRequest, runtime)
 	if err != nil {
 		var _err = &tea.SDKError{}
-		var _t *tea.SDKError
-		if errors.As(err, &_t) {
+		if _t, ok := errors.AsType[*tea.SDKError](err); ok {
 			_err = _t
 		}
 		response.SetReturnCode(w, r, *_err.StatusCode, *_err.Message, *_err.Data)
@@ -105,8 +104,7 @@ func (c *Controller) CtlDescribeVSwitches(w http.ResponseWriter, r *http.Request
 	result, err := aliClient.DescribeVSwitchesWithOptions(describeVSwitchesRequest, runtime)
 	if err != nil {
 		var _err = &tea.SDKError{}
-		var _t *tea.SDKError
-		if errors.As(err, &_t) {
+		if _t, ok := errors.AsType[*tea.SDKError](err); ok {
 			_err = _t
 		}
 		response.SetReturnCode(w, r, *_err.StatusCode, *_err.Message, *_err.Data)
@@ -137,8 +135,7 @@ func (c *Controller) CtlDescribeSecurityGroups(w http.ResponseWriter, r *http.Re
 	result, err := aliClient.DescribeSecurityGroupsWithOptions(describeSecurityGroupsRequest, runtime)
 	if err != nil {
 		var _err = &tea.SDKError{}
-		var _t *tea.SDKError
-		if errors.As(err, &_t) {
+		if _t, ok := errors.AsType[*tea.SDKError](err); ok {
 			_err = _t
 		}
 		response.SetReturnCode(w, r, *_err.StatusCode, *_err.Message, *_err.Data)

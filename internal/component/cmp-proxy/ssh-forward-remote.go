@@ -54,7 +54,9 @@ func (p *proxyConnect) forwardRemote() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	go p.quit("反向代理", ctx, func() {
+		p.logs("反向代理，关闭ctx")
 		cancel()
+		p.logs("反向代理，关闭server")
 		vclose.Close(server)
 	})
 	for {
@@ -72,7 +74,7 @@ func (p *proxyConnect) forwardRemote() {
 				p.error("远程转发 %s TCP 监听失败 %v", p.connect.Listen, _e)
 				return
 			}
-			transfer(_s, conn)
+			Transfer(_s, conn)
 
 		}(client)
 	}

@@ -10,7 +10,7 @@ require (
 	github.com/alibabacloud-go/vpc-20160428/v6 v6.16.0
 	github.com/dchest/captcha v1.1.0
 	golang.org/x/crypto v0.48.0
-	golang.org/x/net v0.50.0
+	golang.org/x/net v0.51.0
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gorm.io/datatypes v1.2.7
 	gorm.io/gorm v1.31.1
